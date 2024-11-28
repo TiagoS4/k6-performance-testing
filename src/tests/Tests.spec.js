@@ -4,18 +4,23 @@ import http from 'k6/http';
 import { check } from 'k6';
 import { Trend, Rate } from 'k6/metrics';
 
-export const getContactsDuration = new Trend('get_contacts', true);
+export const getListUsers = new Trend('get_contacts', true);
 export const RateContentOK = new Rate('content_OK');
 
 export const options = {
   thresholds: {
-    http_req_failed: ['rate<0.30'],
+    http_req_failed: ['rate<0.12'],
     get_contacts: ['p(99)<500'],
-    content_OK: ['rate>0.95']
+    content_OK: ['rate>0.95'],
+    http_req_duration: ['p(95)<5700']
   },
   stages: [
-    { duration: '10s', target: 5 },
-    { duration: '20s', target: 15 }
+    { duration: '20s', target: 10 },
+    { duration: '40s', target: 60 },
+    { duration: '60s', target: 120 },
+    { duration: '60s', target: 180 },
+    { duration: '60s', target: 240 },
+    { duration: '60s', target: 300 }
   ]
 };
 
@@ -27,7 +32,7 @@ export function handleSummary(data) {
 }
 
 export default function () {
-  const baseUrl = 'https://test.k6.io/';
+  const baseUrl = 'https://reqres.in/api/users?page=2';
 
   const params = {
     headers: {
@@ -39,7 +44,7 @@ export default function () {
 
   const res = http.get(`${baseUrl}`, params);
 
-  getContactsDuration.add(res.timings.duration);
+  getListUsers.add(res.timings.duration);
 
   RateContentOK.add(res.status === OK);
 
