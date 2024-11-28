@@ -52,3 +52,5 @@ export default function () {
     'GET Contacts - Status 200': () => res.status === OK
   });
 }
+
+//Trabalho finalizado
